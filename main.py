@@ -3,6 +3,7 @@ import csv
 import base64
 from typing import List, Optional
 import requests
+from langdetect import detect
 from fastapi import FastAPI, File, UploadFile, Request, Form, Query
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -108,11 +109,41 @@ def get_vision_analysis(image, is_pdf=False, vision_model="meta-llama/llama-3.2-
     except Exception as e:
         return f"Error getting analysis: {str(e)}"
 
+def detect_language(text: str) -> str:
+    """Detect the language of the given text.
+    
+    Args:
+        text: The text to detect language for
+        
+    Returns:
+        The language code (e.g., 'en' for English, 'fr' for French)
+    """
+    try:
+        # Remove HTML tags for better language detection
+        clean_text = text
+        for tag in ['<p>', '</p>', '<br>', '<ul>', '</ul>', '<li>', '</li>', '<ol>', '</ol>', '<h3>', '</h3>']:
+            clean_text = clean_text.replace(tag, ' ')
+        
+        # Detect language
+        return detect(clean_text)
+    except Exception as e:
+        print(f"Language detection error: {str(e)}")
+        # Default to English if detection fails
+        return "en"
+
 def translate_to_french(text: str) -> str:
     """Translate text to French using OpenRouter API with mistralai/mixtral-8x7b-instruct model"""
     if not OPENROUTER_API_KEY:
         print("OPENROUTER_API_KEY not found in environment variables")
         return ""
+        
+    # Detect language of the text
+    detected_lang = detect_language(text)
+    
+    # If the text is already in French, return it as is
+    if detected_lang == "fr":
+        print("Text already in French, skipping translation")
+        return text
 
     try:
         headers = {
