@@ -19,6 +19,19 @@ A FastAPI application that generates alt text descriptions for images and PDFs w
   - libtesseract-dev
   - poppler-utils
 
+## Python Dependencies
+
+- fastapi==0.104.1
+- uvicorn==0.23.2
+- python-multipart==0.0.6
+- Pillow==10.0.1
+- pdf2image==1.16.3
+- requests==2.31.0
+- Jinja2==3.1.2
+- aiofiles==23.2.1
+- python-dotenv==1.0.0
+- langdetect==1.0.9
+
 ## Installation
 
 1. Clone the repository
@@ -37,7 +50,7 @@ A FastAPI application that generates alt text descriptions for images and PDFs w
 Create a `.env` file in the root directory with the following variables:
 
 ```
-OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_API_KEY=your_openrouter_api_key_here
 ```
 
 ## Usage
@@ -65,5 +78,5 @@ OPENROUTER_API_KEY=your_openrouter_api_key
 
 ## Notes
 
-- The application uses LM Studio API for image analysis, which should be running locally at `http://localhost:1234`
+- The application uses OpenRouter API with the meta-llama/llama-3.2-11b-vision-instruct model for image analysis
 - French translations are provided by OpenRouter API using the Mixtral model
