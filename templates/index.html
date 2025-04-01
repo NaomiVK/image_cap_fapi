@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Image Alt Text Generator{% endblock %}
+
+{% block content %}
+{% if error %}
+<div class="alert alert-danger" role="alert">
+    {{ error }}
+</div>
+{% endif %}
+
+{% if success %}
+<div class="alert alert-success" role="alert">
+    {{ success }}
+</div>
+{% endif %}
+
+<div class="p-5 mb-4 bg-light rounded-3">
+    <div class="container-fluid py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="display-6 fw-bold">Upload Images or PDFs</h2>
+                <p class="col-md-8 fs-4">Upload images or PDFs to create image alt text with French translations</p>
+            </div>
+            <div>
+                <a href="/reset/" class="btn btn-outline-secondary" onclick="return confirm('Are you sure you want to reset the application? This will delete all temporary files and clear the CSV data.')">Reset App</a>
+            </div>
+        </div>
+        
+        <form action="/upload/" method="post" enctype="multipart/form-data" class="mt-4" id="uploadForm">
+            <div class="mb-3">
+                <label for="visionModel" class="form-label">Choose Vision Model</label>
+                <select class="form-select" id="visionModel" name="vision_model">
+                    <option value="meta-llama/llama-3.2-11b-vision-instruct">Meta Llama 3.2 11B Vision</option>
+                    <option value="google/gemini-pro-vision">Google Gemini Pro Vision</option>
+                    <option value="x-ai/grok-2-vision-1212">X.AI Grok-2 Vision</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="formFile" class="form-label">Choose files (PNG, JPG, JPEG, PDF)</label>
+                <input class="form-control" type="file" id="formFile" name="files" multiple
+                       accept=".png,.jpg,.jpeg,.pdf" required>
+            </div>
+            <div class="mb-3">
+                <p class="text-muted">You can select multiple files at once</p>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">Upload and Process</button>
+            
+            <div id="loadingIndicator" style="display: none;" class="mt-4">
+                <div class="d-flex align-items-center">
+                    <div class="spinner-border text-primary me-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">Processing files...</h5>
+                        <p class="text-muted mb-0">This may take a few moments depending on the number and size of files.</p>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row align-items-md-stretch">
+    <div class="col-md-6">
+        <div class="h-100 p-5 text-white bg-dark rounded-3">
+            <h2>Image Processing</h2>
+            <p>For images, the system will generate a concise alt text description suitable for web accessibility.</p>
+            <p>The description will be translated to French automatically.</p>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="h-100 p-5 bg-light border rounded-3">
+            <h2>PDF Processing</h2>
+            <p>For PDFs, each page will be converted to an image and analyzed separately.</p>
+            <p>The system will generate a thorough description of the text content in each page.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('uploadForm');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        form.addEventListener('submit', function() {
+            // Show loading indicator
+            loadingIndicator.style.display = 'block';
+            // Disable submit button to prevent multiple submissions
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Processing...';
+        });
+    });
+</script>
+{% endblock %}

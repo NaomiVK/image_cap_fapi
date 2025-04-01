@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Processing Results{% endblock %}
+
+{% block content %}
+<div class="alert alert-success" role="alert">
+    <h4 class="alert-heading">Processing Complete!</h4>
+    <p>All files have been processed and translated successfully.</p>
+</div>
+
+<div class="d-flex justify-content-between mb-4">
+    <a href="/" class="btn btn-primary">Upload More Files</a>
+    <div>
+        <a href="/download-csv/" class="btn btn-success me-2">Download CSV</a>
+        <a href="/reset/" class="btn btn-warning" onclick="return confirm('Are you sure you want to reset the application? This will delete all temporary files and clear the CSV data.')">Reset App</a>
+    </div>
+</div>
+
+{% for result in results %}
+    {% if result.type == 'error' %}
+        <div class="result-card bg-light">
+            <h3>Error: {{ result.filename }}</h3>
+            <div class="alert alert-danger">
+                {{ result.error }}
+            </div>
+        </div>
+    {% elif result.type == 'pdf' %}
+        <div class="result-card">
+            <h3>PDF: {{ result.filename }}</h3>
+            
+            {% for page in result.pages %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Page {{ page.page_num }}</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if page.error is defined %}
+                            <div class="alert alert-warning">
+                                {{ page.error }}
+                            </div>
+                        {% else %}
+                            <div class="text-center mb-3">
+                                <img src="/{{ page.image_path }}" class="img-fluid" alt="PDF Page {{ page.page_num }}" style="max-height: 300px;">
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>English Description:</h5>
+                                    <div class="description-box formatted-text">
+                                        {{ page.long_desc|safe }}
+                                    </div>
+                                    <button class="copy-btn" data-text-id="pdf-en-{{ result.filename|replace('.', '_') }}-{{ page.page_num }}">Copy Text</button>
+                                    <div id="pdf-en-{{ result.filename|replace('.', '_') }}-{{ page.page_num }}" style="display: none;">{{ page.long_desc }}</div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <h5>Description Française:</h5>
+                                    <div class="description-box formatted-text">
+                                        {{ page.french_long_desc|safe }}
+                                    </div>
+                                    <button class="copy-btn" data-text-id="pdf-fr-{{ result.filename|replace('.', '_') }}-{{ page.page_num }}">Copy Text</button>
+                                    <div id="pdf-fr-{{ result.filename|replace('.', '_') }}-{{ page.page_num }}" style="display: none;">{{ page.french_long_desc }}</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="result-card">
+            <h3>Image: {{ result.filename }}</h3>
+            
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <img src="/{{ result.image_path }}" class="img-fluid" alt="Uploaded Image" style="max-height: 300px;">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>English Alt Text Description:</h5>
+                            <div class="description-box">
+                                {{ result.analysis }}
+                            </div>
+                            <button class="copy-btn" data-text-id="img-en-{{ result.filename|replace('.', '_') }}">Copy Text</button>
+                            <div id="img-en-{{ result.filename|replace('.', '_') }}" style="display: none;">{{ result.analysis }}</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5>Description Alternative Française:</h5>
+                            <div class="description-box">
+                                {{ result.french_analysis }}
+                            </div>
+                            <button class="copy-btn" data-text-id="img-fr-{{ result.filename|replace('.', '_') }}">Copy Text</button>
+                            <div id="img-fr-{{ result.filename|replace('.', '_') }}" style="display: none;">{{ result.french_analysis }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}
+
+{% if not results %}
+    <div class="alert alert-warning" role="alert">
+        No files were processed. Please try uploading files again.
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block styles %}
+<style>
+    .formatted-text {
+        white-space: pre-wrap;
+        font-family: system-ui, -apple-system, sans-serif;
+        line-height: 1.6;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 5px;
+    }
+    
+    .formatted-text br {
+        display: block;
+        margin: 5px 0;
+        content: "";
+    }
+    
+    .formatted-text br + • {
+        margin-left: 1em;
+    }
+    
+    .description-box {
+        margin-bottom: 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        overflow-y: auto;
+        max-height: 400px;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Function to sanitize strings for use as HTML IDs
+    function sanitizeForId(str) {
+        return str.replace(/[^a-zA-Z0-9_-]/g, '_');
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyButtons = document.querySelectorAll('.copy-btn');
+        
+        copyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const textId = this.getAttribute('data-text-id');
+                const textElement = document.getElementById(textId);
+                const text = textElement.textContent;
+                
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => this.textContent = originalText, 2000);
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

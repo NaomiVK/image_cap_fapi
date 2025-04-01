@@ -1,27 +1,69 @@
-# Deploy FastAPI on Render
+# Image Alt Text Generator
 
-Use this repo as a template to deploy a Python [FastAPI](https://fastapi.tiangolo.com) service on Render.
+A FastAPI application that generates alt text descriptions for images and PDFs with French translations.
 
-See https://render.com/docs/deploy-fastapi or follow the steps below:
+## Features
 
-## Manual Steps
+- Upload and process multiple images and PDFs
+- Generate concise alt text for images
+- Extract and summarize text content from PDFs
+- Automatic translation to French
+- Export descriptions to CSV
+- Copy text functionality
 
-1. You may use this repository directly or [create your own repository from this template](https://github.com/render-examples/fastapi/generate) if you'd like to customize the code.
-2. Create a new Web Service on Render.
-3. Specify the URL to your new repository or this repository.
-4. Render will automatically detect that you are deploying a Python service and use `pip` to download the dependencies.
-5. Specify the following as the Start Command.
+## Requirements
 
-    ```shell
-    uvicorn main:app --host 0.0.0.0 --port $PORT
-    ```
+- Python 3.8+
+- System dependencies (install via apt on Debian/Ubuntu):
+  - tesseract-ocr
+  - libtesseract-dev
+  - poppler-utils
 
-6. Click Create Web Service.
+## Installation
 
-Or simply click:
+1. Clone the repository
+2. Install the system dependencies:
+   ```
+   sudo apt-get update
+   sudo apt-get install -y tesseract-ocr libtesseract-dev poppler-utils
+   ```
+3. Install Python dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/render-examples/fastapi)
+## Environment Variables
 
-## Thanks
+Create a `.env` file in the root directory with the following variables:
 
-Thanks to [Harish](https://harishgarg.com) for the [inspiration to create a FastAPI quickstart for Render](https://twitter.com/harishkgarg/status/1435084018677010434) and for some sample code!
+```
+OPENROUTER_API_KEY=your_openrouter_api_key
+```
+
+## Usage
+
+1. Start the FastAPI server:
+   ```
+   python main.py
+   ```
+   
+2. Open your browser and navigate to `http://localhost:8000`
+
+3. Upload images or PDFs using the form
+
+4. View the generated descriptions and translations
+
+5. Download the CSV file with all descriptions
+
+## API Endpoints
+
+- `GET /`: Home page with upload form
+- `POST /upload/`: Upload and process files
+- `GET /download-csv/`: Download the CSV file with all descriptions
+- `GET /reset/`: Reset the application (clear temporary files and CSV data)
+- `GET /health`: Health check endpoint to verify the API is running
+
+## Notes
+
+- The application uses LM Studio API for image analysis, which should be running locally at `http://localhost:1234`
+- French translations are provided by OpenRouter API using the Mixtral model
